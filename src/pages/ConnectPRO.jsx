@@ -14,11 +14,13 @@ export default function ConnectPRO() {
   const connectedIds = new Set(connectedPROs.map(p => p.id))
   const available = Object.values(PRO_REGISTRY).filter(p => !connectedIds.has(p.id))
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     if (!selected || !accountId.trim()) return
-    addPRO(selected.id, accountId.trim())
-    setSuccess(true)
-    setTimeout(() => navigate(`/pro/${selected.id}`), 1200)
+    const result = await addPRO(selected.id, accountId.trim())
+    if (result?.ok !== false) {
+      setSuccess(true)
+      setTimeout(() => navigate(`/pro/${selected.id}`), 1200)
+    }
   }
 
   return (

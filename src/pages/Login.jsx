@@ -15,12 +15,11 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    await new Promise(r => setTimeout(r, 600)) // simulate network
-    const ok = login(email, password)
-    if (ok) {
+    const result = await login(email, password)
+    if (result.ok) {
       navigate('/dashboard')
     } else {
-      setError('Invalid credentials. Password must be 6+ characters.')
+      setError(result.error || 'Invalid credentials')
     }
     setLoading(false)
   }

@@ -1,5 +1,5 @@
-import { createContext, useContext, useState } from 'react'
-import { generateMockData } from '../data/mockData'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { useAuth } from './AuthContext'
 
 const PROContext = createContext(null)
 
@@ -37,41 +37,70 @@ export const PRO_REGISTRY = {
 }
 
 export function PROProvider({ children }) {
-  const [connectedPROs, setConnectedPROs] = useState(() => {
-    const saved = localStorage.getItem('rt_pros')
-    if (saved) return JSON.parse(saved)
-    // Demo: pre-load all PROs
-    return [
-      { ...PRO_REGISTRY.bmi, accountId: 'BMI-00213456', data: generateMockData('bmi') },
-      { ...PRO_REGISTRY.ascap, accountId: 'ASCAP-77821', data: generateMockData('ascap') },
-      { ...PRO_REGISTRY.prs, accountId: 'PRS-44198320', data: generateMockData('prs') },
-      { ...PRO_REGISTRY.songtrust, accountId: 'ST-90127654', data: generateMockData('songtrust') },
-      { ...PRO_REGISTRY.sesac, accountId: 'SESAC-33045821', data: generateMockData('sesac') },
-      { ...PRO_REGISTRY.socan, accountId: 'SOCAN-11583920', data: generateMockData('socan') },
-    ]
-  })
+  const { authFetch, user } = useAuth()
+  const [connectedPROs, setConnectedPROs] = useState([])
+  const [loading, setLoading] = useState(false)
 
-  const save = (pros) => {
-    setConnectedPROs(pros)
-    localStorage.setItem('rt_pros', JSON.stringify(pros))
-  }
+  // Fetch connected PROs from backend when user logs in
+  const fetchPROs = useCallback(async () => {
+    if (!user) {
+      setConnectedPROs([])
+      return
+    }
+    setLoading(true)
+    try {
+      const res = await authFetch('/api/pros')
+      if (res.ok) {
+        const data = await res.json()
+        setConnectedPROs(data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch PROs:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [user, authFetch])
 
-  const addPRO = (proId, accountId) => {
-    const base = PRO_REGISTRY[proId]
-    if (!base) return
-    if (connectedPROs.find(p => p.id === proId)) return
-    const entry = { ...base, accountId, data: generateMockData(proId) }
-    save([...connectedPROs, entry])
-  }
+  useEffect(() => {
+    fetchPROs()
+  }, [fetchPROs])
 
-  const removePRO = (proId) => {
-    save(connectedPROs.filter(p => p.id !== proId))
-  }
+  const addPRO = useCallback(async (proId, accountId) => {
+    try {
+      const res = await authFetch('/api/pros', {
+        method: 'POST',
+        body: JSON.stringify({ proId, accountId }),
+      })
+      if (res.ok) {
+        const newPro = await res.json()
+        setConnectedPROs(prev => [...prev, newPro])
+        return { ok: true }
+      }
+      const err = await res.json()
+      return { ok: false, error: err.error }
+    } catch {
+      return { ok: false, error: 'Network error' }
+    }
+  }, [authFetch])
 
-  const getPRO = (proId) => connectedPROs.find(p => p.id === proId)
+  const removePRO = useCallback(async (proId) => {
+    try {
+      const res = await authFetch(`/api/pros/${proId}`, { method: 'DELETE' })
+      if (res.ok) {
+        setConnectedPROs(prev => prev.filter(p => p.id !== proId))
+      }
+    } catch (err) {
+      console.error('Failed to remove PRO:', err)
+    }
+  }, [authFetch])
+
+  const getPRO = useCallback(
+    (proId) => connectedPROs.find(p => p.id === proId),
+    [connectedPROs]
+  )
 
   return (
-    <PROContext.Provider value={{ connectedPROs, addPRO, removePRO, getPRO, PRO_REGISTRY }}>
+    <PROContext.Provider value={{ connectedPROs, addPRO, removePRO, getPRO, PRO_REGISTRY, loading }}>
       {children}
     </PROContext.Provider>
   )

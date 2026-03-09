@@ -1,31 +1,73 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useCallback } from 'react'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('rt_user')
-    return saved ? JSON.parse(saved) : null
-  })
+  const [user, setUser] = useState(null)
+  const [session, setSession] = useState(null)
 
-  const login = (email, password) => {
-    // Mock auth — replace with real API
-    if (email && password.length >= 6) {
-      const u = { id: '1', email, name: email.split('@')[0], avatar: null }
-      setUser(u)
-      localStorage.setItem('rt_user', JSON.stringify(u))
-      return true
+  const login = useCallback(async (email, password) => {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+      if (!res.ok) return { ok: false, error: data.error }
+
+      setUser(data.user)
+      setSession(data.session)
+      return { ok: true }
+    } catch {
+      return { ok: false, error: 'Network error' }
     }
-    return false
-  }
+  }, [])
 
-  const logout = () => {
+  const signup = useCallback(async (email, password, name) => {
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
+      })
+      const data = await res.json()
+      if (!res.ok) return { ok: false, error: data.error }
+
+      setUser(data.user)
+      setSession(data.session)
+      return { ok: true }
+    } catch {
+      return { ok: false, error: 'Network error' }
+    }
+  }, [])
+
+  const logout = useCallback(async () => {
+    if (session?.access_token) {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      }).catch(() => {})
+    }
     setUser(null)
-    localStorage.removeItem('rt_user')
-  }
+    setSession(null)
+  }, [session])
+
+  // Helper for authenticated fetch calls
+  const authFetch = useCallback(async (url, opts = {}) => {
+    if (!session?.access_token) throw new Error('Not authenticated')
+    return fetch(url, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+        ...opts.headers,
+      },
+    })
+  }, [session])
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, session, login, signup, logout, authFetch }}>
       {children}
     </AuthContext.Provider>
   )
