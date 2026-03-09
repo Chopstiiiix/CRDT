@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react'
+import { API_URL } from '../config'
 
 const AuthContext = createContext(null)
 
@@ -8,7 +9,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -26,7 +27,7 @@ export function AuthProvider({ children }) {
 
   const signup = useCallback(async (email, password, name) => {
     try {
-      const res = await fetch('/api/auth/signup', {
+      const res = await fetch(`${API_URL}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, name }),
@@ -44,7 +45,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     if (session?.access_token) {
-      await fetch('/api/auth/logout', {
+      await fetch(`${API_URL}/api/auth/logout`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
       }).catch(() => {})
@@ -56,7 +57,8 @@ export function AuthProvider({ children }) {
   // Helper for authenticated fetch calls
   const authFetch = useCallback(async (url, opts = {}) => {
     if (!session?.access_token) throw new Error('Not authenticated')
-    return fetch(url, {
+    const fullUrl = url.startsWith('http') ? url : `${API_URL}${url}`
+    return fetch(fullUrl, {
       ...opts,
       headers: {
         'Content-Type': 'application/json',

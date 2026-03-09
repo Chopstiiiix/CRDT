@@ -47,7 +47,7 @@ export default function Sidebar() {
       WebkitBackdropFilter: 'blur(30px)',
     }}>
       {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px', marginBottom: 28 }}>
+      <NavLink to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px', marginBottom: 28, textDecoration: 'none', color: 'inherit' }}>
         <div style={{
           width: 28, height: 28,
           background: 'linear-gradient(135deg, #4a9eff, #2dd4bf)',
@@ -57,7 +57,7 @@ export default function Sidebar() {
           <Music2 size={14} color="#fff" />
         </div>
         <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.02em' }}>RoyalTrack</span>
-      </div>
+      </NavLink>
 
       {/* Main nav */}
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

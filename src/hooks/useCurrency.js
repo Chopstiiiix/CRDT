@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { API_URL } from '../config'
 
 // Static rates (fetched from backend, fallback to USD)
 const FALLBACK_RATES = {
@@ -18,7 +19,7 @@ export function useCurrency() {
   const [rates, setRates] = useState(FALLBACK_RATES)
 
   useEffect(() => {
-    fetch('/api/currency/rates')
+    fetch(`${API_URL}/api/currency/rates`)
       .then(r => r.json())
       .then(data => { if (data.rates) setRates(data.rates) })
       .catch(() => {})
