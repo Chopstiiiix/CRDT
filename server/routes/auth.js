@@ -83,9 +83,17 @@ router.post('/login', async (req, res) => {
 
 // POST /api/auth/logout
 router.post('/logout', async (req, res) => {
+  // Frontend clears its session state; server-side we can optionally
+  // sign out the user's sessions via a scoped client
   const token = req.headers.authorization?.slice(7)
   if (token) {
-    await supabaseAdmin.auth.admin.signOut(token).catch(() => {})
+    const { createClient } = await import('@supabase/supabase-js')
+    const scopedClient = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_ANON_KEY,
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
+    )
+    await scopedClient.auth.signOut().catch(() => {})
   }
   res.json({ ok: true })
 })

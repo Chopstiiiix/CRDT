@@ -1,27 +1,43 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Music2, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react'
+import { Music2, Mail, Lock, User, ArrowRight, AlertCircle } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login, signup } = useAuth()
   const navigate = useNavigate()
+  const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+
+    if (isSignUp && password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
+
     setLoading(true)
-    const result = await login(email, password)
+    const result = isSignUp
+      ? await signup(email, password, name)
+      : await login(email, password)
+
     if (result.ok) {
       navigate('/dashboard')
     } else {
-      setError(result.error || 'Invalid credentials')
+      setError(result.error || 'Something went wrong')
     }
     setLoading(false)
+  }
+
+  const toggleMode = () => {
+    setIsSignUp(!isSignUp)
+    setError('')
   }
 
   const inputStyle = {
@@ -77,9 +93,26 @@ export default function Login() {
 
         {/* Card */}
         <div className="glass-strong" style={{ borderRadius: 22, padding: '28px 28px' }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 22 }}>Sign in</h2>
+          <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 22 }}>
+            {isSignUp ? 'Create account' : 'Sign in'}
+          </h2>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {isSignUp && (
+              <div style={{ position: 'relative' }}>
+                <User size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)', pointerEvents: 'none' }} />
+                <input
+                  type="text"
+                  placeholder="Full name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  style={inputStyle}
+                  onFocus={e => e.target.style.borderColor = 'rgba(74,158,255,0.5)'}
+                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                />
+              </div>
+            )}
+
             <div style={{ position: 'relative' }}>
               <Mail size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)', pointerEvents: 'none' }} />
               <input
@@ -102,6 +135,7 @@ export default function Login() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
+                minLength={6}
                 style={inputStyle}
                 onFocus={e => e.target.style.borderColor = 'rgba(74,158,255,0.5)'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
@@ -156,23 +190,24 @@ export default function Login() {
                     borderRadius: '50%',
                     animation: 'spin 0.7s linear infinite',
                   }} />
-                  Signing in...
+                  {isSignUp ? 'Creating account...' : 'Signing in...'}
                 </>
               ) : (
-                <>Continue <ArrowRight size={14} /></>
+                <>{isSignUp ? 'Create account' : 'Continue'} <ArrowRight size={14} /></>
               )}
             </button>
           </form>
 
           <p style={{ marginTop: 18, fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>
-            Don't have an account?{' '}
-            <span style={{ color: 'var(--accent-blue)', cursor: 'pointer' }}>Sign up</span>
+            {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+            <span
+              onClick={toggleMode}
+              style={{ color: 'var(--accent-blue)', cursor: 'pointer', fontWeight: 500 }}
+            >
+              {isSignUp ? 'Sign in' : 'Sign up'}
+            </span>
           </p>
         </div>
-
-        <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-tertiary)', marginTop: 18 }}>
-          Demo: use any email + 6+ char password
-        </p>
       </div>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } } @keyframes scaleIn { from { opacity:0; transform: scale(0.97) translateY(8px); } to { opacity:1; transform: scale(1) translateY(0); } }`}</style>
