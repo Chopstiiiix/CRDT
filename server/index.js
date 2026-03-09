@@ -21,6 +21,8 @@ app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:5173',
     'https://royaltrack.vercel.app',
+    'https://theroyaltrack.com',
+    'https://www.theroyaltrack.com',
   ].filter(Boolean),
   credentials: true,
 }))
