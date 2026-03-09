@@ -66,9 +66,17 @@ router.post('/login', async (req, res) => {
   // Fetch profile
   const { data: profile } = await supabaseAdmin
     .from('profiles')
-    .select('name, avatar_url')
+    .select('name, avatar_url, role, suspended, suspended_reason')
     .eq('id', data.user.id)
     .single()
+
+  // Check if account is suspended
+  if (profile?.suspended) {
+    return res.status(403).json({
+      error: 'Account suspended',
+      reason: profile.suspended_reason || 'Your account has been temporarily disabled.',
+    })
+  }
 
   res.json({
     user: {
@@ -76,6 +84,7 @@ router.post('/login', async (req, res) => {
       email: data.user.email,
       name: profile?.name || email.split('@')[0],
       avatar: profile?.avatar_url,
+      role: profile?.role || 'user',
     },
     session: data.session,
   })

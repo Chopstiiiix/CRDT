@@ -1,12 +1,12 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Music2, Settings, LogOut, Plus, ChevronRight, Film, Crown } from 'lucide-react'
+import { LayoutDashboard, Music2, Settings, LogOut, Plus, ChevronRight, Film, Crown, Shield } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { usePRO } from '../context/PROContext'
 import { useSubscription } from '../context/SubscriptionContext'
 import { Avatar } from './UI'
 
 export default function Sidebar() {
-  const { user, logout } = useAuth()
+  const { user, logout, isAdmin } = useAuth()
   const { connectedPROs } = usePRO()
   const { currentTier, setShowPricing, tier } = useSubscription()
   const navigate = useNavigate()
@@ -75,6 +75,17 @@ export default function Sidebar() {
           <Settings size={15} />
           Settings
         </NavLink>
+        {isAdmin && (
+          <NavLink to="/admin" style={({ isActive }) => ({
+            ...navStyle(isActive),
+            color: isActive ? '#a78bfa' : 'var(--text-secondary)',
+            background: isActive ? 'rgba(167,139,250,0.1)' : 'transparent',
+            border: isActive ? '1px solid rgba(167,139,250,0.2)' : '1px solid transparent',
+          })}>
+            <Shield size={15} />
+            Admin
+          </NavLink>
+        )}
       </nav>
 
       {/* PRO Accounts */}

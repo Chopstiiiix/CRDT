@@ -10,6 +10,7 @@ import PRODashboard from './pages/PRODashboard'
 import ConnectPRO from './pages/ConnectPRO'
 import Settings from './pages/Settings'
 import SyncLicensing from './pages/SyncLicensing'
+import AdminDashboard from './pages/AdminDashboard'
 
 function ProtectedLayout({ children }) {
   const { user } = useAuth()
@@ -54,6 +55,7 @@ function AppRoutes() {
       <Route path="/connect" element={<ProtectedLayout><ConnectPRO /></ProtectedLayout>} />
       <Route path="/sync-licensing" element={<ProtectedLayout><SyncLicensing /></ProtectedLayout>} />
       <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
+      <Route path="/admin" element={<ProtectedLayout><AdminDashboard /></ProtectedLayout>} />
       <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
     </Routes>
   )

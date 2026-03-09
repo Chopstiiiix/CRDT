@@ -8,6 +8,7 @@ import prosRoutes from './routes/pros.js'
 import settingsRoutes from './routes/settings.js'
 import exportsRoutes from './routes/exports.js'
 import syncLicensesRoutes from './routes/sync-licenses.js'
+import adminRoutes from './routes/admin.js'
 import { convert, getSupportedCurrencies, RATES } from './utils/currency.js'
 import { requireAuth } from './middleware/auth.js'
 import { startScheduler } from './services/scheduler.js'
@@ -35,6 +36,7 @@ app.use('/api/pros', prosRoutes)
 app.use('/api/settings', settingsRoutes)
 app.use('/api/exports', exportsRoutes)
 app.use('/api/sync-licenses', syncLicensesRoutes)
+app.use('/api/admin', adminRoutes)
 
 // Currency conversion
 app.get('/api/currency/rates', (req, res) => {
