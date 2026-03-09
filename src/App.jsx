@@ -1,7 +1,9 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PROProvider } from './context/PROContext'
+import { SubscriptionProvider, useSubscription } from './context/SubscriptionContext'
 import Sidebar from './components/Sidebar'
+import PricingModal from './components/PricingModal'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import PRODashboard from './pages/PRODashboard'
@@ -11,6 +13,7 @@ import SyncLicensing from './pages/SyncLicensing'
 
 function ProtectedLayout({ children }) {
   const { user } = useAuth()
+  const { showPricing } = useSubscription()
   if (!user) return <Navigate to="/login" replace />
 
   return (
@@ -34,6 +37,8 @@ function ProtectedLayout({ children }) {
       }}>
         {children}
       </main>
+
+      {showPricing && <PricingModal />}
     </div>
   )
 }
@@ -57,9 +62,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <AuthProvider>
-      <PROProvider>
-        <AppRoutes />
-      </PROProvider>
+      <SubscriptionProvider>
+        <PROProvider>
+          <AppRoutes />
+        </PROProvider>
+      </SubscriptionProvider>
     </AuthProvider>
   )
 }

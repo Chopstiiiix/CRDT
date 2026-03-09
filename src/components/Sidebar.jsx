@@ -1,12 +1,14 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Music2, Settings, LogOut, Plus, ChevronRight, Film } from 'lucide-react'
+import { LayoutDashboard, Music2, Settings, LogOut, Plus, ChevronRight, Film, Crown } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { usePRO } from '../context/PROContext'
+import { useSubscription } from '../context/SubscriptionContext'
 import { Avatar } from './UI'
 
 export default function Sidebar() {
   const { user, logout } = useAuth()
   const { connectedPROs } = usePRO()
+  const { currentTier, setShowPricing, tier } = useSubscription()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -133,12 +135,42 @@ export default function Sidebar() {
         </div>
       </div>
 
+      {/* Upgrade CTA */}
+      {tier !== 'royal' && (
+        <button
+          onClick={() => setShowPricing(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            width: '100%',
+            padding: '10px 12px',
+            borderRadius: 12,
+            border: '1px solid rgba(251,191,36,0.25)',
+            background: 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02))',
+            color: '#fbbf24',
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: 'inherit',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            marginBottom: 8,
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(251,191,36,0.12)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02))'}
+        >
+          <Crown size={13} />
+          <span>Upgrade</span>
+          <span style={{ marginLeft: 'auto', fontSize: 10, color: 'rgba(251,191,36,0.6)', textTransform: 'uppercase' }}>
+            {currentTier.name}
+          </span>
+        </button>
+      )}
+
       {/* User */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 10,
         padding: '10px 10px',
         borderTop: '1px solid var(--glass-border)',
-        marginTop: 12,
+        marginTop: tier === 'royal' ? 12 : 0,
       }}>
         <Avatar name={user?.name || user?.email} size={28} />
         <div style={{ flex: 1, overflow: 'hidden' }}>

@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Check, Plus, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Check, Plus, ExternalLink, Lock } from 'lucide-react'
 import { usePRO } from '../context/PROContext'
+import { useSubscription } from '../context/SubscriptionContext'
 import { GlassCard, GlassButton } from '../components/UI'
 
 export default function ConnectPRO() {
   const { connectedPROs, addPRO, PRO_REGISTRY } = usePRO()
+  const { canAddPRO, currentTier, setShowPricing } = useSubscription()
   const navigate = useNavigate()
   const [selected, setSelected] = useState(null)
   const [accountId, setAccountId] = useState('')
   const [success, setSuccess] = useState(false)
 
+  const atLimit = !canAddPRO(connectedPROs.length)
   const connectedIds = new Set(connectedPROs.map(p => p.id))
   const available = Object.values(PRO_REGISTRY).filter(p => !connectedIds.has(p.id))
 
@@ -118,6 +121,29 @@ export default function ConnectPRO() {
             </div>
           </div>
 
+          {/* PRO limit warning */}
+          {atLimit && (
+            <GlassCard style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              padding: '14px 18px', marginBottom: 8,
+              background: 'rgba(251,191,36,0.06)',
+              border: '1px solid rgba(251,191,36,0.2)',
+            }}>
+              <Lock size={16} color="#fbbf24" />
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>
+                  PRO limit reached ({currentTier.maxPROs} max on {currentTier.name} plan)
+                </p>
+                <p style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+                  Upgrade your plan to connect more PRO accounts.
+                </p>
+              </div>
+              <GlassButton variant="primary" onClick={() => setShowPricing(true)}>
+                Upgrade
+              </GlassButton>
+            </GlassCard>
+          )}
+
           {/* Account ID input */}
           {selected && (
             <GlassCard style={{ marginBottom: 16 }}>
@@ -156,7 +182,7 @@ export default function ConnectPRO() {
           <GlassButton
             variant="primary"
             onClick={handleConnect}
-            disabled={!selected || !accountId.trim()}
+            disabled={!selected || !accountId.trim() || atLimit}
           >
             <Plus size={14} />
             Connect {selected?.name || 'PRO'}

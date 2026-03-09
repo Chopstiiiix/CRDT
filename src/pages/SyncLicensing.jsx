@@ -6,7 +6,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { usePRO } from '../context/PROContext'
+import { useSubscription } from '../context/SubscriptionContext'
 import { GlassCard, GlassButton, Badge, SectionHeader, Divider } from '../components/UI'
+import UpgradeGate from '../components/UpgradeGate'
 
 const TYPE_ICONS = {
   Film: <Film size={14} />,
@@ -30,6 +32,7 @@ function fmt(n, currency = 'USD') {
 }
 
 export default function SyncLicensing() {
+  const { canAccess, currentTier, setShowPricing } = useSubscription()
   const { authFetch } = useAuth()
   const { connectedPROs } = usePRO()
   const [licenses, setLicenses] = useState([])
@@ -66,6 +69,30 @@ export default function SyncLicensing() {
     await authFetch(`/api/sync-licenses/${id}`, { method: 'DELETE' })
     setLicenses(prev => prev.filter(l => l.id !== id))
   }
+
+  if (!canAccess('syncLicensing')) {
+    return (
+      <div style={{ padding: '28px 32px', animation: 'fadeIn 0.3s ease forwards' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 26 }}>
+          <Link to="/dashboard" style={{
+            width: 32, height: 32, borderRadius: 9,
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--text-secondary)', textDecoration: 'none',
+          }}>
+            <ArrowLeft size={14} />
+          </Link>
+          <h1 style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.02em' }}>Sync Licensing</h1>
+        </div>
+        <UpgradeGate feature="syncLicensing" message="Sync Licensing requires a Special or Royal plan" />
+        <style>{`@keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }`}</style>
+      </div>
+    )
+  }
+
+  // Apply sync license limit for Special tier
+  const syncLimit = currentTier.features.syncLicensingLimit
+  const visibleLicenses = syncLimit === Infinity ? licenses : licenses.slice(0, syncLimit)
 
   const totalFees = licenses.reduce((sum, l) => sum + (parseFloat(l.fee) || 0), 0)
   const activeLicenses = licenses.filter(l => l.status === 'active').length
@@ -162,14 +189,14 @@ export default function SyncLicensing() {
       {/* Licenses List */}
       {loading ? (
         <GlassCard style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>Loading...</GlassCard>
-      ) : licenses.length === 0 ? (
+      ) : visibleLicenses.length === 0 ? (
         <GlassCard style={{ textAlign: 'center', padding: 40 }}>
           <Film size={28} style={{ color: 'var(--text-tertiary)', marginBottom: 12 }} />
           <p style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>No sync licenses yet. Add your first placement above.</p>
         </GlassCard>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {licenses.map(l => (
+          {visibleLicenses.map(l => (
             <GlassCard key={l.id} style={{ padding: '16px 20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -213,6 +240,17 @@ export default function SyncLicensing() {
               )}
             </GlassCard>
           ))}
+          {licenses.length > visibleLicenses.length && (
+            <GlassCard style={{ textAlign: 'center', padding: '16px' }}>
+              <p style={{ fontSize: 13, color: 'var(--text-tertiary)', marginBottom: 8 }}>
+                {licenses.length - visibleLicenses.length} more license{licenses.length - visibleLicenses.length > 1 ? 's' : ''} hidden.
+                Upgrade to Royal for unlimited access.
+              </p>
+              <GlassButton variant="primary" onClick={() => setShowPricing(true)}>
+                Upgrade Plan
+              </GlassButton>
+            </GlassCard>
+          )}
         </div>
       )}
 

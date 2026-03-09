@@ -8,7 +8,9 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { usePRO } from '../context/PROContext'
 import { useCurrency } from '../hooks/useCurrency'
+import { useSubscription } from '../context/SubscriptionContext'
 import { GlassCard, Stat, Badge, SectionHeader, Divider, GlassButton } from '../components/UI'
+import UpgradeGate from '../components/UpgradeGate'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
@@ -160,7 +162,11 @@ export default function PRODashboard() {
 
       {tab === 'Overview' && <OverviewTab pro={pro} data={data} colors={colors} breakdownData={breakdownData} fmt={fmt} CustomTooltip={CustomTooltip} />}
       {tab === 'Catalogue' && <CatalogueTab data={data} pro={pro} fmt={fmt} />}
-      {tab === 'Statements' && <StatementsTab data={data} pro={pro} fmt={fmt} proId={proId} authFetch={authFetch} />}
+      {tab === 'Statements' && (
+        <UpgradeGate feature="viewStatements" message="Royalty statements require an upgrade">
+          <StatementsTab data={data} pro={pro} fmt={fmt} proId={proId} authFetch={authFetch} />
+        </UpgradeGate>
+      )}
 
       <style>{`@keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }`}</style>
     </div>
@@ -168,6 +174,7 @@ export default function PRODashboard() {
 }
 
 function OverviewTab({ pro, data, colors, breakdownData, fmt, CustomTooltip }) {
+  const { canAccess, setShowPricing } = useSubscription()
   const totalPrev = data.monthly.slice(0, 6).reduce((s, m) => s + m.performance + m.mechanical + m.sync + m.digital, 0)
   const totalCurr = data.monthly.slice(6).reduce((s, m) => s + m.performance + m.mechanical + m.sync + m.digital, 0)
   const pct = totalPrev > 0 ? ((totalCurr - totalPrev) / totalPrev * 100).toFixed(1) : 0
@@ -247,30 +254,35 @@ function OverviewTab({ pro, data, colors, breakdownData, fmt, CustomTooltip }) {
       </div>
 
       {/* Top Countries */}
-      <GlassCard>
-        <SectionHeader title="Top Markets" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {data.topCountries.map((c, i) => (
-            <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)', width: 120 }}>{c.name}</span>
-              <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 4, overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%', borderRadius: 4,
-                  width: `${c.pct}%`,
-                  background: `linear-gradient(90deg, ${pro.color}, ${pro.color}88)`,
-                  transition: 'width 1s ease',
-                }} />
+      {canAccess('topMarkets') ? (
+        <GlassCard>
+          <SectionHeader title="Top Markets" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {data.topCountries.map((c) => (
+              <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)', width: 120 }}>{c.name}</span>
+                <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%', borderRadius: 4,
+                    width: `${c.pct}%`,
+                    background: `linear-gradient(90deg, ${pro.color}, ${pro.color}88)`,
+                    transition: 'width 1s ease',
+                  }} />
+                </div>
+                <span className="num" style={{ fontSize: 12, color: 'var(--text-secondary)', width: 32, textAlign: 'right' }}>{c.pct}%</span>
               </div>
-              <span className="num" style={{ fontSize: 12, color: 'var(--text-secondary)', width: 32, textAlign: 'right' }}>{c.pct}%</span>
-            </div>
-          ))}
-        </div>
-      </GlassCard>
+            ))}
+          </div>
+        </GlassCard>
+      ) : (
+        <UpgradeGate feature="topMarkets" message="Top Markets requires an upgrade" />
+      )}
     </div>
   )
 }
 
 function CatalogueTab({ data, pro, fmt }) {
+  const { canAccess } = useSubscription()
   const [search, setSearch] = useState('')
   const [expandedWork, setExpandedWork] = useState(null)
   const filtered = data.catalogue.filter(w =>
@@ -330,7 +342,7 @@ function CatalogueTab({ data, pro, fmt }) {
                   borderBottom: expandedWork === w.id ? 'none' : (i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none'),
                   cursor: w.coWriters?.length ? 'pointer' : 'default',
                 }}
-                onClick={() => w.coWriters?.length && setExpandedWork(expandedWork === w.id ? null : w.id)}
+                onClick={() => w.coWriters?.length && canAccess('coWriterSplits') && setExpandedWork(expandedWork === w.id ? null : w.id)}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
@@ -420,6 +432,7 @@ function CatalogueTab({ data, pro, fmt }) {
 }
 
 function StatementsTab({ data, pro, fmt, proId, authFetch }) {
+  const { canAccess, setShowPricing } = useSubscription()
   const handleExport = async (type) => {
     try {
       const res = await authFetch(`/api/exports/csv/${proId}?type=${type}`)
@@ -439,17 +452,23 @@ function StatementsTab({ data, pro, fmt, proId, authFetch }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {/* Export buttons */}
-      <div style={{ display: 'flex', gap: 8 }}>
-        <GlassButton onClick={() => handleExport('statements')}>
-          <Download size={13} /> Export Statements CSV
+      {canAccess('downloadExports') ? (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <GlassButton onClick={() => handleExport('statements')}>
+            <Download size={13} /> Export Statements CSV
+          </GlassButton>
+          <GlassButton onClick={() => handleExport('catalogue')}>
+            <Download size={13} /> Export Catalogue CSV
+          </GlassButton>
+          <GlassButton onClick={() => handleExport('monthly')}>
+            <Download size={13} /> Export Monthly CSV
+          </GlassButton>
+        </div>
+      ) : (
+        <GlassButton variant="ghost" onClick={() => setShowPricing(true)}>
+          <Download size={13} /> Upgrade to export data
         </GlassButton>
-        <GlassButton onClick={() => handleExport('catalogue')}>
-          <Download size={13} /> Export Catalogue CSV
-        </GlassButton>
-        <GlassButton onClick={() => handleExport('monthly')}>
-          <Download size={13} /> Export Monthly CSV
-        </GlassButton>
-      </div>
+      )}
 
       {data.statements.map(s => (
         <GlassCard key={s.id} style={{ padding: '16px 20px' }}>
