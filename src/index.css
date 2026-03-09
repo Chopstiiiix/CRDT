@@ -1,0 +1,159 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-base: #06070d;
+  --bg-mesh-1: #0d1a2e;
+  --bg-mesh-2: #0a0f1e;
+  --accent-blue: #4a9eff;
+  --accent-teal: #2dd4bf;
+  --accent-purple: #a78bfa;
+  --accent-green: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-rose: #f87171;
+
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-bg-hover: rgba(255, 255, 255, 0.07);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-border-strong: rgba(255, 255, 255, 0.15);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  --glass-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.55);
+  --text-tertiary: rgba(255, 255, 255, 0.3);
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+
+  --sidebar-w: 240px;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html, body {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+#root {
+  height: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* Glass utility classes */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--glass-border-strong);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+/* Animated mesh background */
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mesh-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.25;
+  animation: floatBlob 20s ease-in-out infinite;
+}
+
+.mesh-blob-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, #1a3a6e 0%, transparent 70%);
+  top: -200px; left: -150px;
+  animation-delay: 0s;
+}
+
+.mesh-blob-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #0d2d4a 0%, transparent 70%);
+  top: 40%; right: -100px;
+  animation-delay: -7s;
+}
+
+.mesh-blob-3 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #1a1040 0%, transparent 70%);
+  bottom: -100px; left: 30%;
+  animation-delay: -14s;
+}
+
+@keyframes floatBlob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.97); }
+}
+
+/* Typography */
+.font-display { font-family: 'DM Serif Display', serif; }
+
+/* Number formatting */
+.num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* Transitions */
+button, a { transition: var(--transition); }
+
+/* Focus visible */
+*:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-in {
+  animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* PRO color accents */
+.pro-bmi { --pro-color: #4a9eff; --pro-glow: rgba(74,158,255,0.15); }
+.pro-ascap { --pro-color: #f87171; --pro-glow: rgba(248,113,113,0.15); }
+.pro-prs { --pro-color: #2dd4bf; --pro-glow: rgba(45,212,191,0.15); }
+.pro-songtrust { --pro-color: #a78bfa; --pro-glow: rgba(167,139,250,0.15); }
+.pro-sesac { --pro-color: #fbbf24; --pro-glow: rgba(251,191,36,0.15); }
+.pro-socan { --pro-color: #34d399; --pro-glow: rgba(52,211,153,0.15); }
+.pro-custom { --pro-color: #f472b6; --pro-glow: rgba(244,114,182,0.15); }
