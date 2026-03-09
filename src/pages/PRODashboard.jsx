@@ -2,18 +2,17 @@ import { useParams, Link, Navigate } from 'react-router-dom'
 import { useState } from 'react'
 import {
   ArrowLeft, DollarSign, Music, FileText, TrendingUp,
-  ExternalLink, Trash2, Clock, CheckCircle, AlertCircle
+  ExternalLink, Trash2, Clock, CheckCircle, AlertCircle,
+  Download, Users, ChevronDown, ChevronUp
 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { usePRO } from '../context/PROContext'
+import { useCurrency } from '../hooks/useCurrency'
 import { GlassCard, Stat, Badge, SectionHeader, Divider, GlassButton } from '../components/UI'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts'
-
-function fmt(n) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n || 0)
-}
 
 const TABS = ['Overview', 'Catalogue', 'Statements']
 
@@ -47,6 +46,8 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function PRODashboard() {
   const { proId } = useParams()
   const { getPRO, removePRO } = usePRO()
+  const { authFetch } = useAuth()
+  const { fmt } = useCurrency()
   const [tab, setTab] = useState('Overview')
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -159,7 +160,7 @@ export default function PRODashboard() {
 
       {tab === 'Overview' && <OverviewTab pro={pro} data={data} colors={colors} breakdownData={breakdownData} fmt={fmt} CustomTooltip={CustomTooltip} />}
       {tab === 'Catalogue' && <CatalogueTab data={data} pro={pro} fmt={fmt} />}
-      {tab === 'Statements' && <StatementsTab data={data} pro={pro} fmt={fmt} />}
+      {tab === 'Statements' && <StatementsTab data={data} pro={pro} fmt={fmt} proId={proId} authFetch={authFetch} />}
 
       <style>{`@keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }`}</style>
     </div>
@@ -271,10 +272,18 @@ function OverviewTab({ pro, data, colors, breakdownData, fmt, CustomTooltip }) {
 
 function CatalogueTab({ data, pro, fmt }) {
   const [search, setSearch] = useState('')
+  const [expandedWork, setExpandedWork] = useState(null)
   const filtered = data.catalogue.filter(w =>
     w.title.toLowerCase().includes(search.toLowerCase()) ||
     w.iswc.includes(search)
   )
+
+  const ROLE_COLORS = {
+    Composer: '#4a9eff',
+    Lyricist: '#a78bfa',
+    Arranger: '#2dd4bf',
+    Publisher: '#fbbf24',
+  }
 
   return (
     <GlassCard>
@@ -301,36 +310,105 @@ function CatalogueTab({ data, pro, fmt }) {
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            {['Title', 'ISWC', 'Registered', 'Type', 'Earned', 'Last Payment', 'Status'].map(h => (
+            {['', 'Title', 'ISWC', 'Registered', 'Type', 'Earned', 'Last Payment', 'Status'].map(h => (
               <th key={h} style={{
                 padding: '8px 10px', textAlign: 'left',
                 fontSize: 11, color: 'var(--text-tertiary)',
                 fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em',
                 borderBottom: '1px solid var(--glass-border)',
+                width: h === '' ? 30 : undefined,
               }}>{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {filtered.map((w, i) => (
-            <tr
-              key={w.id}
-              style={{ borderBottom: i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >
-              <td style={{ padding: '11px 10px', fontSize: 13, fontWeight: 500 }}>{w.title}</td>
-              <td style={{ padding: '11px 10px', fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{w.iswc}</td>
-              <td style={{ padding: '11px 10px', fontSize: 12, color: 'var(--text-secondary)' }}>{w.registered}</td>
-              <td style={{ padding: '11px 10px' }}><Badge color={pro.color}>{w.usageType}</Badge></td>
-              <td style={{ padding: '11px 10px' }}>
-                <span className="num" style={{ fontSize: 13, fontWeight: 600, color: pro.color }}>{fmt(w.totalEarned)}</span>
-              </td>
-              <td style={{ padding: '11px 10px' }}>
-                <span className="num" style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{fmt(w.lastPayment)}</span>
-              </td>
-              <td style={{ padding: '11px 10px' }}><StatusBadge status={w.status} /></td>
-            </tr>
+            <>
+              <tr
+                key={w.id}
+                style={{
+                  borderBottom: expandedWork === w.id ? 'none' : (i < filtered.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none'),
+                  cursor: w.coWriters?.length ? 'pointer' : 'default',
+                }}
+                onClick={() => w.coWriters?.length && setExpandedWork(expandedWork === w.id ? null : w.id)}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
+                <td style={{ padding: '11px 6px', textAlign: 'center' }}>
+                  {w.coWriters?.length > 0 && (
+                    <div style={{ color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {expandedWork === w.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    </div>
+                  )}
+                </td>
+                <td style={{ padding: '11px 10px', fontSize: 13, fontWeight: 500 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {w.title}
+                    {w.coWriters?.length > 0 && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'var(--text-tertiary)' }}>
+                        <Users size={10} /> {w.coWriters.length}
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td style={{ padding: '11px 10px', fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>{w.iswc}</td>
+                <td style={{ padding: '11px 10px', fontSize: 12, color: 'var(--text-secondary)' }}>{w.registered}</td>
+                <td style={{ padding: '11px 10px' }}><Badge color={pro.color}>{w.usageType}</Badge></td>
+                <td style={{ padding: '11px 10px' }}>
+                  <span className="num" style={{ fontSize: 13, fontWeight: 600, color: pro.color }}>{fmt(w.totalEarned)}</span>
+                </td>
+                <td style={{ padding: '11px 10px' }}>
+                  <span className="num" style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{fmt(w.lastPayment)}</span>
+                </td>
+                <td style={{ padding: '11px 10px' }}><StatusBadge status={w.status} /></td>
+              </tr>
+              {/* Co-Writer Split Visualization */}
+              {expandedWork === w.id && w.coWriters?.length > 0 && (
+                <tr key={`${w.id}-splits`}>
+                  <td colSpan={8} style={{ padding: '0 10px 14px 40px', background: 'rgba(255,255,255,0.015)' }}>
+                    <div style={{ padding: '14px 0' }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
+                        Co-Writer Splits
+                      </div>
+                      {/* Split bar visualization */}
+                      <div style={{ display: 'flex', height: 8, borderRadius: 4, overflow: 'hidden', marginBottom: 14, gap: 2 }}>
+                        {w.coWriters.map((cw, ci) => (
+                          <div key={ci} style={{
+                            width: `${cw.splitPct}%`,
+                            background: ROLE_COLORS[cw.role] || '#4a9eff',
+                            borderRadius: 2,
+                            transition: 'width 0.5s ease',
+                          }} />
+                        ))}
+                      </div>
+                      {/* Writer details */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {w.coWriters.map((cw, ci) => (
+                          <div key={ci} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ width: 8, height: 8, borderRadius: '50%', background: ROLE_COLORS[cw.role] || '#4a9eff' }} />
+                              <span style={{ fontWeight: 500 }}>{cw.writerName}</span>
+                              <Badge color={ROLE_COLORS[cw.role] || '#4a9eff'}>{cw.role}</Badge>
+                              {cw.proAffiliation && (
+                                <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>({cw.proAffiliation})</span>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                              {cw.ipiNumber && (
+                                <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'monospace' }}>IPI: {cw.ipiNumber}</span>
+                              )}
+                              <span className="num" style={{ fontWeight: 600, color: ROLE_COLORS[cw.role] || '#4a9eff' }}>
+                                {cw.splitPct}%
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </>
           ))}
         </tbody>
       </table>
@@ -341,9 +419,38 @@ function CatalogueTab({ data, pro, fmt }) {
   )
 }
 
-function StatementsTab({ data, pro, fmt }) {
+function StatementsTab({ data, pro, fmt, proId, authFetch }) {
+  const handleExport = async (type) => {
+    try {
+      const res = await authFetch(`/api/exports/csv/${proId}?type=${type}`)
+      if (!res.ok) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${pro.name}-${type}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Export failed:', err)
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Export buttons */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <GlassButton onClick={() => handleExport('statements')}>
+          <Download size={13} /> Export Statements CSV
+        </GlassButton>
+        <GlassButton onClick={() => handleExport('catalogue')}>
+          <Download size={13} /> Export Catalogue CSV
+        </GlassButton>
+        <GlassButton onClick={() => handleExport('monthly')}>
+          <Download size={13} /> Export Monthly CSV
+        </GlassButton>
+      </div>
+
       {data.statements.map(s => (
         <GlassCard key={s.id} style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

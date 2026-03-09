@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Music2, Settings, LogOut, Plus, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Music2, Settings, LogOut, Plus, ChevronRight, Film } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { usePRO } from '../context/PROContext'
 import { Avatar } from './UI'
@@ -64,6 +64,10 @@ export default function Sidebar() {
         <NavLink to="/dashboard" style={({ isActive }) => navStyle(isActive)}>
           <LayoutDashboard size={15} />
           Overview
+        </NavLink>
+        <NavLink to="/sync-licensing" style={({ isActive }) => navStyle(isActive)}>
+          <Film size={15} />
+          Sync Licensing
         </NavLink>
         <NavLink to="/settings" style={({ isActive }) => navStyle(isActive)}>
           <Settings size={15} />

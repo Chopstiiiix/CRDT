@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import PRODashboard from './pages/PRODashboard'
 import ConnectPRO from './pages/ConnectPRO'
 import Settings from './pages/Settings'
+import SyncLicensing from './pages/SyncLicensing'
 
 function ProtectedLayout({ children }) {
   const { user } = useAuth()
@@ -46,6 +47,7 @@ function AppRoutes() {
       <Route path="/dashboard" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
       <Route path="/pro/:proId" element={<ProtectedLayout><PRODashboard /></ProtectedLayout>} />
       <Route path="/connect" element={<ProtectedLayout><ConnectPRO /></ProtectedLayout>} />
+      <Route path="/sync-licensing" element={<ProtectedLayout><SyncLicensing /></ProtectedLayout>} />
       <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
       <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
     </Routes>

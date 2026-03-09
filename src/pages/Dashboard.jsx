@@ -2,14 +2,11 @@ import { Link } from 'react-router-dom'
 import { TrendingUp, DollarSign, Music, AlertCircle, Plus, ArrowRight, ChevronRight } from 'lucide-react'
 import { usePRO } from '../context/PROContext'
 import { useAuth } from '../context/AuthContext'
+import { useCurrency } from '../hooks/useCurrency'
 import { GlassCard, Stat, Badge, SectionHeader } from '../components/UI'
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts'
-
-function fmt(n) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-}
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
@@ -29,6 +26,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function Dashboard() {
   const { user } = useAuth()
   const { connectedPROs } = usePRO()
+  const { fmt, currency, setCurrency, currencies } = useCurrency()
 
   const totalEarnings = connectedPROs.reduce((sum, p) => sum + (p.data?.totalEarnings || 0), 0)
   const pendingBalance = connectedPROs.reduce((sum, p) => sum + (p.data?.pendingBalance || 0), 0)
@@ -50,13 +48,32 @@ export default function Dashboard() {
   return (
     <div style={{ padding: '28px 32px', animation: 'fadeIn 0.3s ease forwards' }}>
       {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <h1 className="font-display" style={{ fontSize: 26, letterSpacing: '-0.02em', marginBottom: 4 }}>
-          Good morning, {name} 👋
-        </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-          {connectedPROs.length} PRO account{connectedPROs.length !== 1 ? 's' : ''} connected
-        </p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
+        <div>
+          <h1 className="font-display" style={{ fontSize: 26, letterSpacing: '-0.02em', marginBottom: 4 }}>
+            Good morning, {name} 👋
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
+            {connectedPROs.length} PRO account{connectedPROs.length !== 1 ? 's' : ''} connected
+          </p>
+        </div>
+        <select
+          value={currency}
+          onChange={e => setCurrency(e.target.value)}
+          style={{
+            padding: '7px 12px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 9,
+            color: '#fff',
+            fontSize: 12,
+            fontFamily: 'inherit',
+            outline: 'none',
+            cursor: 'pointer',
+          }}
+        >
+          {currencies.map(c => <option key={c} value={c} style={{ background: '#0a0f1e' }}>{c}</option>)}
+        </select>
       </div>
 
       {/* Summary stats */}

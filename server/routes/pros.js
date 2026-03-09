@@ -14,12 +14,31 @@ async function assembleProData(connection) {
   const cid = connection.id
   const registry = PRO_REGISTRY[connection.pro_id]
 
-  const [monthly, catalogue, statements, countries] = await Promise.all([
+  const [monthly, catalogue, statements, countries, syncLicenses] = await Promise.all([
     supabaseAdmin.from('royalty_monthly').select('*').eq('connection_id', cid).order('id'),
     supabaseAdmin.from('catalogue_works').select('*').eq('connection_id', cid),
     supabaseAdmin.from('statements').select('*').eq('connection_id', cid).order('id'),
     supabaseAdmin.from('top_countries').select('*').eq('connection_id', cid).order('pct', { ascending: false }),
+    supabaseAdmin.from('sync_licenses').select('*').eq('connection_id', cid).order('created_at', { ascending: false }),
   ])
+
+  // Fetch co-writer splits for all works
+  const workIds = (catalogue.data || []).map(w => w.id)
+  const { data: allSplits } = workIds.length
+    ? await supabaseAdmin.from('co_writer_splits').select('*').in('work_id', workIds)
+    : { data: [] }
+  const splitsByWork = {}
+  for (const s of (allSplits || [])) {
+    if (!splitsByWork[s.work_id]) splitsByWork[s.work_id] = []
+    splitsByWork[s.work_id].push({
+      id: s.id,
+      writerName: s.writer_name,
+      role: s.role,
+      splitPct: s.split_pct,
+      proAffiliation: s.pro_affiliation,
+      ipiNumber: s.ipi_number,
+    })
+  }
 
   const monthlyData = (monthly.data || []).map(r => ({
     month: r.month,
@@ -43,6 +62,7 @@ async function assembleProData(connection) {
     lastPayment: r.last_payment,
     status: r.status,
     usageType: r.usage_type,
+    coWriters: splitsByWork[r.id] || [],
   }))
 
   const statementsData = (statements.data || []).map(r => ({
@@ -81,12 +101,25 @@ async function assembleProData(connection) {
     lastSynced: connection.last_synced_at,
     data: {
       totalEarnings,
-      pendingBalance: Math.floor(totalEarnings * 0.08), // approximate
+      pendingBalance: Math.floor(totalEarnings * 0.08),
       catalogueCount: catalogueData.length,
       monthly: monthlyData,
       catalogue: catalogueData,
       statements: statementsData,
       topCountries: countriesData,
+      syncLicenses: (syncLicenses.data || []).map(l => ({
+        id: l.id,
+        workTitle: l.work_title,
+        licensee: l.licensee,
+        projectType: l.project_type,
+        territory: l.territory,
+        fee: l.fee,
+        currency: l.currency,
+        startDate: l.start_date,
+        endDate: l.end_date,
+        status: l.status,
+        notes: l.notes,
+      })),
     },
   }
 }

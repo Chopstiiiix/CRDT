@@ -70,7 +70,50 @@ function generateMockData(proId) {
     { country_name: 'Australia', pct: rand(2, 8) },
   ].sort((a, b) => b.pct - a.pct)
 
-  return { monthly, catalogue, statements, topCountries }
+  // Co-writer splits for each catalogue work
+  const writerNames = [
+    'Jordan Ellis', 'Maya Chen', 'Luca Moretti', 'Aisha Patel',
+    'Diego Santos', 'Freya Lindström', 'Omar Hassan', 'Nina Kowalski',
+  ]
+  const roles = ['Composer', 'Lyricist', 'Arranger', 'Publisher']
+
+  const coWriterSplits = catalogue.map(work => {
+    const numWriters = work.writers
+    const splits = []
+    let remaining = 100
+    for (let w = 0; w < numWriters; w++) {
+      const pct = w === numWriters - 1 ? remaining : Math.floor(remaining / (numWriters - w)) + rand(-10, 10)
+      const clamped = Math.max(5, Math.min(remaining, pct))
+      remaining -= clamped
+      splits.push({
+        writer_name: writerNames[rand(0, writerNames.length - 1)],
+        role: roles[rand(0, roles.length - 1)],
+        split_pct: clamped,
+        pro_affiliation: ['BMI', 'ASCAP', 'PRS', 'SESAC', 'SOCAN'][rand(0, 4)],
+        ipi_number: `${rand(100000000, 999999999)}`,
+      })
+    }
+    return { workTitle: work.title, splits }
+  })
+
+  // Sync licenses
+  const licensees = ['Netflix', 'Apple TV+', 'Nike', 'EA Sports', 'HBO', 'Spotify', 'Samsung', 'Universal Pictures']
+  const projectTypes = ['Film', 'TV', 'Commercial', 'Video Game', 'Trailer', 'Web/Streaming']
+  const territories = ['Worldwide', 'North America', 'Europe', 'UK & Ireland', 'Asia Pacific']
+  const syncLicenses = Array.from({ length: rand(2, 5) }, () => ({
+    work_title: titles[rand(0, titles.length - 1)],
+    licensee: licensees[rand(0, licensees.length - 1)],
+    project_type: projectTypes[rand(0, projectTypes.length - 1)],
+    territory: territories[rand(0, territories.length - 1)],
+    fee: rand(500, 25000),
+    currency: 'USD',
+    start_date: dateLabel(rand(1, 12)),
+    end_date: dateLabel(rand(0, 0)),
+    status: ['active', 'pending', 'expired', 'negotiating'][rand(0, 3)],
+    notes: null,
+  }))
+
+  return { monthly, catalogue, statements, topCountries, coWriterSplits, syncLicenses }
 }
 
 // ── Sync: generate + upsert into Supabase ────────────────────────────
@@ -80,6 +123,11 @@ export async function syncPROData(connectionId, proId) {
 
   // Clear old data for this connection
   await Promise.all([
+    supabaseAdmin.from('co_writer_splits').delete().in(
+      'work_id',
+      (await supabaseAdmin.from('catalogue_works').select('id').eq('connection_id', connectionId)).data?.map(r => r.id) || []
+    ),
+    supabaseAdmin.from('sync_licenses').delete().eq('connection_id', connectionId),
     supabaseAdmin.from('royalty_monthly').delete().eq('connection_id', connectionId),
     supabaseAdmin.from('catalogue_works').delete().eq('connection_id', connectionId),
     supabaseAdmin.from('statements').delete().eq('connection_id', connectionId),
@@ -91,16 +139,37 @@ export async function syncPROData(connectionId, proId) {
     supabaseAdmin.from('royalty_monthly').insert(
       data.monthly.map(m => ({ connection_id: connectionId, ...m }))
     ),
-    supabaseAdmin.from('catalogue_works').insert(
-      data.catalogue.map(c => ({ connection_id: connectionId, ...c }))
-    ),
     supabaseAdmin.from('statements').insert(
       data.statements.map(s => ({ connection_id: connectionId, ...s }))
     ),
     supabaseAdmin.from('top_countries').insert(
       data.topCountries.map(tc => ({ connection_id: connectionId, ...tc }))
     ),
+    supabaseAdmin.from('sync_licenses').insert(
+      data.syncLicenses.map(l => ({ connection_id: connectionId, ...l }))
+    ),
   ])
+
+  // Insert catalogue works, then co-writer splits (needs work IDs)
+  const { data: insertedWorks } = await supabaseAdmin
+    .from('catalogue_works')
+    .insert(data.catalogue.map(c => ({ connection_id: connectionId, ...c })))
+    .select('id, title')
+
+  if (insertedWorks?.length) {
+    const allSplits = []
+    for (const work of insertedWorks) {
+      const match = data.coWriterSplits.find(s => s.workTitle === work.title)
+      if (match) {
+        for (const split of match.splits) {
+          allSplits.push({ work_id: work.id, ...split })
+        }
+      }
+    }
+    if (allSplits.length) {
+      await supabaseAdmin.from('co_writer_splits').insert(allSplits)
+    }
+  }
 
   // Update last_synced_at
   await supabaseAdmin
