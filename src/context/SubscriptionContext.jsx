@@ -57,7 +57,7 @@ export const TIERS = {
 }
 
 export function SubscriptionProvider({ children }) {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [tier, setTier] = useState(() => {
     const saved = localStorage.getItem('rt_tier')
     return saved && TIERS[saved] ? saved : 'free'
@@ -71,12 +71,14 @@ export function SubscriptionProvider({ children }) {
   const currentTier = TIERS[tier]
 
   const canAccess = useCallback((feature) => {
+    if (isAdmin) return true
     return currentTier.features[feature] ?? false
-  }, [currentTier])
+  }, [currentTier, isAdmin])
 
   const canAddPRO = useCallback((currentCount) => {
+    if (isAdmin) return true
     return currentCount < currentTier.maxPROs
-  }, [currentTier])
+  }, [currentTier, isAdmin])
 
   const upgradeTo = useCallback((newTier) => {
     if (TIERS[newTier]) {
