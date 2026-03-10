@@ -51,7 +51,7 @@ export default function Dashboard() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
         <div>
           <h1 className="font-display" style={{ fontSize: 26, letterSpacing: '-0.02em', marginBottom: 4 }}>
-            Good morning, {name} 👋
+            Good morning, {name}
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
             {connectedPROs.length} PRO account{connectedPROs.length !== 1 ? 's' : ''} connected
