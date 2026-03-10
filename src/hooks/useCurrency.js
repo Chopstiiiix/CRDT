@@ -4,12 +4,12 @@ import { API_URL } from '../config'
 // Static rates (fetched from backend, fallback to USD)
 const FALLBACK_RATES = {
   USD: 1, GBP: 0.79, EUR: 0.92, CAD: 1.36, AUD: 1.53,
-  JPY: 149.5, CHF: 0.88, SEK: 10.45, NOK: 10.65, DKK: 6.87,
+  JPY: 149.5, CHF: 0.88, SEK: 10.45, NOK: 10.65, DKK: 6.87, NGN: 1550,
 }
 
 const SYMBOLS = {
   USD: '$', GBP: '£', EUR: '€', CAD: 'C$', AUD: 'A$',
-  JPY: '¥', CHF: 'CHF', SEK: 'kr', NOK: 'kr', DKK: 'kr',
+  JPY: '¥', CHF: 'CHF', SEK: 'kr', NOK: 'kr', DKK: 'kr', NGN: '₦',
 }
 
 export function useCurrency() {

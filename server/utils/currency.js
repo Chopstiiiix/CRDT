@@ -10,6 +10,7 @@ const RATES = {
   SEK: 10.45,
   NOK: 10.65,
   DKK: 6.87,
+  NGN: 1550,
 }
 
 export function convert(amount, from, to) {
