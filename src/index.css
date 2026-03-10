@@ -108,7 +108,7 @@ html, body {
 }
 
 /* Typography */
-.font-display { font-family: 'DM Serif Display', serif; }
+.font-display { font-family: 'Disket Mono', 'DM Sans', sans-serif; }
 
 /* Number formatting */
 .num {
