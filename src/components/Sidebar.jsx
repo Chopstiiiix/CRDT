@@ -43,7 +43,7 @@ export default function Sidebar() {
       display: 'flex',
       flexDirection: 'column',
       padding: '20px 14px',
-      background: 'rgba(6,7,13,0.7)',
+      background: 'rgba(10,10,10,0.85)',
       borderRight: '1px solid var(--glass-border)',
       backdropFilter: 'blur(30px)',
       WebkitBackdropFilter: 'blur(30px)',

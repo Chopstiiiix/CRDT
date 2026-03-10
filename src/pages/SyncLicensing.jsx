@@ -149,7 +149,7 @@ export default function SyncLicensing() {
             <FormField label="PRO">
               <select value={form.proId} onChange={e => setForm(f => ({ ...f, proId: e.target.value }))} required style={selectStyle}>
                 <option value="">Select PRO...</option>
-                {connectedPROs.map(p => <option key={p.id} value={p.id} style={{ background: '#0a0f1e' }}>{p.name}</option>)}
+                {connectedPROs.map(p => <option key={p.id} value={p.id} style={{ background: '#111' }}>{p.name}</option>)}
               </select>
             </FormField>
             <FormField label="Work Title">
@@ -161,7 +161,7 @@ export default function SyncLicensing() {
             <FormField label="Project Type">
               <select value={form.projectType} onChange={e => setForm(f => ({ ...f, projectType: e.target.value }))} style={selectStyle}>
                 {['Film', 'TV', 'Commercial', 'Video Game', 'Trailer', 'Web/Streaming', 'Other'].map(t =>
-                  <option key={t} value={t} style={{ background: '#0a0f1e' }}>{t}</option>
+                  <option key={t} value={t} style={{ background: '#111' }}>{t}</option>
                 )}
               </select>
             </FormField>

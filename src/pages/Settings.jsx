@@ -90,7 +90,7 @@ export default function Settings() {
                 cursor: 'pointer',
               }}
             >
-              {currencies.map(c => <option key={c} value={c} style={{ background: '#0a0f1e' }}>{c}</option>)}
+              {currencies.map(c => <option key={c} value={c} style={{ background: '#111' }}>{c}</option>)}
             </select>
           </div>
 

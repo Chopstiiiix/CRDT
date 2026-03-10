@@ -411,7 +411,7 @@ export default function AdminDashboard() {
             onClick={e => e.stopPropagation()}
             style={{
               width: 420, maxWidth: '90vw',
-              background: 'rgba(12,15,28,0.95)',
+              background: 'rgba(17,17,17,0.97)',
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 16, padding: 28,
               boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
