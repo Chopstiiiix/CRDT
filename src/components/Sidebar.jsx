@@ -147,7 +147,7 @@ export default function Sidebar() {
       </div>
 
       {/* Upgrade CTA */}
-      {tier !== 'royal' && (
+      {tier !== 'royal' && !isAdmin && (
         <button
           onClick={() => setShowPricing(true)}
           className="hover-brighten"
