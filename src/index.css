@@ -155,6 +155,22 @@ button, a { transition: var(--transition); }
 .hover-text-red:hover { color: #f87171 !important; }
 .hover-text-secondary:hover { color: var(--text-secondary) !important; }
 
+/* Sidebar nav hover */
+.sidebar-nav {
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar-nav:hover {
+  color: var(--text-primary) !important;
+  background: rgba(255,255,255,0.06) !important;
+  transform: scale(1.03);
+}
+.sidebar-nav:hover svg {
+  filter: drop-shadow(0 0 4px rgba(74,158,255,0.5));
+}
+.sidebar-nav:active {
+  transform: scale(0.98);
+}
+
 /* PRO color accents */
 .pro-bmi { --pro-color: #4a9eff; --pro-glow: rgba(74,158,255,0.15); }
 .pro-ascap { --pro-color: #f87171; --pro-glow: rgba(248,113,113,0.15); }

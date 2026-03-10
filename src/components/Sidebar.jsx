@@ -142,20 +142,20 @@ export default function Sidebar({ onWidthChange }) {
 
       {/* Main nav */}
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <NavLink to="/dashboard" onClick={handleNavClick} style={({ isActive }) => navStyle(isActive)} title="Overview">
+        <NavLink to="/dashboard" className="sidebar-nav" onClick={handleNavClick} style={({ isActive }) => navStyle(isActive)} title="Overview">
           <LayoutDashboard size={15} style={{ flexShrink: 0 }} />
           {!collapsed && 'Overview'}
         </NavLink>
-        <NavLink to="/sync-licensing" onClick={handleNavClick} style={({ isActive }) => navStyle(isActive)} title="Sync Licensing">
+        <NavLink to="/sync-licensing" className="sidebar-nav" onClick={handleNavClick} style={({ isActive }) => navStyle(isActive)} title="Sync Licensing">
           <Film size={15} style={{ flexShrink: 0 }} />
           {!collapsed && 'Sync Licensing'}
         </NavLink>
-        <NavLink to="/settings" onClick={handleNavClick} style={({ isActive }) => navStyle(isActive)} title="Settings">
+        <NavLink to="/settings" className="sidebar-nav" onClick={handleNavClick} style={({ isActive }) => navStyle(isActive)} title="Settings">
           <Settings size={15} style={{ flexShrink: 0 }} />
           {!collapsed && 'Settings'}
         </NavLink>
         {isAdmin && (
-          <NavLink to="/admin" onClick={handleNavClick} style={({ isActive }) => ({
+          <NavLink to="/admin" className="sidebar-nav" onClick={handleNavClick} style={({ isActive }) => ({
             ...navStyle(isActive),
             color: isActive ? '#a78bfa' : 'var(--text-secondary)',
             background: isActive ? 'rgba(167,139,250,0.1)' : 'transparent',
@@ -224,6 +224,7 @@ export default function Sidebar({ onWidthChange }) {
           {connectedPROs.map(pro => (
             <NavLink
               key={pro.id}
+              className="sidebar-nav"
               to={`/pro/${pro.id}`}
               onClick={handleNavClick}
               title={pro.name}
