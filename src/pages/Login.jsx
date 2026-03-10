@@ -149,8 +149,7 @@ export default function Login() {
                   background: 'none', border: 'none', cursor: 'pointer', padding: 4,
                   color: 'var(--text-tertiary)', display: 'flex', transition: 'color 0.15s',
                 }}
-                onMouseEnter={e => e.currentTarget.style.color = 'var(--text-secondary)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                className="hover-text-secondary"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}

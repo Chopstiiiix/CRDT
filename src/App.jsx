@@ -11,6 +11,7 @@ import ConnectPRO from './pages/ConnectPRO'
 import Settings from './pages/Settings'
 import SyncLicensing from './pages/SyncLicensing'
 import AdminDashboard from './pages/AdminDashboard'
+import ErrorBoundary from './components/ErrorBoundary'
 
 function ProtectedLayout({ children }) {
   const { user } = useAuth()
@@ -63,12 +64,14 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SubscriptionProvider>
-        <PROProvider>
-          <AppRoutes />
-        </PROProvider>
-      </SubscriptionProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <SubscriptionProvider>
+          <PROProvider>
+            <AppRoutes />
+          </PROProvider>
+        </SubscriptionProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }

@@ -163,8 +163,7 @@ export default function Dashboard() {
                     color: 'inherit',
                     transition: 'background 0.15s',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                  className="hover-brighten"
                 >
                   <div style={{
                     width: 34, height: 34,

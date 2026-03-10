@@ -358,8 +358,7 @@ export default function AdminDashboard() {
                               background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)',
                               color: '#34d399', transition: 'all 0.15s',
                             }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(52,211,153,0.2)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(52,211,153,0.1)'}
+                            className="hover-brighten"
                           >
                             <ShieldCheck size={11} /> Activate
                           </button>
@@ -374,8 +373,7 @@ export default function AdminDashboard() {
                               background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)',
                               color: '#f87171', transition: 'all 0.15s',
                             }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.15)'}
-                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(248,113,113,0.08)'}
+                            className="hover-brighten"
                           >
                             <ShieldX size={11} /> Suspend
                           </button>

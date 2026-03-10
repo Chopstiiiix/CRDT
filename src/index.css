@@ -149,6 +149,11 @@ button, a { transition: var(--transition); }
   animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* Hover utilities — replaces inline onMouseEnter/onMouseLeave */
+.hover-brighten:hover:not(:disabled) { filter: brightness(1.2); }
+.hover-text-red:hover { color: #f87171 !important; }
+.hover-text-secondary:hover { color: var(--text-secondary) !important; }
+
 /* PRO color accents */
 .pro-bmi { --pro-color: #4a9eff; --pro-glow: rgba(74,158,255,0.15); }
 .pro-ascap { --pro-color: #f87171; --pro-glow: rgba(248,113,113,0.15); }

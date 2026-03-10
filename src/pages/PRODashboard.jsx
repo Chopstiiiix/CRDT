@@ -343,8 +343,7 @@ function CatalogueTab({ data, pro, fmt }) {
                   cursor: w.coWriters?.length ? 'pointer' : 'default',
                 }}
                 onClick={() => w.coWriters?.length && canAccess('coWriterSplits') && setExpandedWork(expandedWork === w.id ? null : w.id)}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.025)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                className="hover-brighten"
               >
                 <td style={{ padding: '11px 6px', textAlign: 'center' }}>
                   {w.coWriters?.length > 0 && (

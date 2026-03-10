@@ -58,8 +58,7 @@ export default function Settings() {
                 <button
                   onClick={() => removePRO(pro.id)}
                   style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 6, borderRadius: 6 }}
-                  onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
+                  className="hover-text-red"
                   title={`Disconnect ${pro.name}`}
                 >
                   <Trash2 size={13} />

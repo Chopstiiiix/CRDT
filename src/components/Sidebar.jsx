@@ -150,6 +150,7 @@ export default function Sidebar() {
       {tier !== 'royal' && (
         <button
           onClick={() => setShowPricing(true)}
+          className="hover-brighten"
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
             width: '100%',
@@ -165,8 +166,6 @@ export default function Sidebar() {
             transition: 'all 0.2s',
             marginBottom: 8,
           }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(251,191,36,0.12)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02))'}
         >
           <Crown size={13} />
           <span>Upgrade</span>
@@ -193,14 +192,13 @@ export default function Sidebar() {
         <button
           onClick={handleLogout}
           title="Logout"
+          className="hover-text-red"
           style={{
             background: 'none', border: 'none',
             color: 'var(--text-tertiary)', cursor: 'pointer',
             padding: 4, borderRadius: 6, display: 'flex',
             transition: 'color 0.15s',
           }}
-          onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
-          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
         >
           <LogOut size={14} />
         </button>

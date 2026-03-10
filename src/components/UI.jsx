@@ -41,7 +41,7 @@ export function GlassButton({ children, onClick, variant = 'default', className 
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={className}
+      className={`hover-brighten ${className}`}
       style={{
         ...styles[variant],
         display: 'inline-flex',
@@ -58,12 +58,6 @@ export function GlassButton({ children, onClick, variant = 'default', className 
         WebkitBackdropFilter: 'blur(10px)',
         transition: 'all 0.2s cubic-bezier(0.4,0,0.2,1)',
         whiteSpace: 'nowrap',
-      }}
-      onMouseEnter={e => {
-        if (!disabled) e.currentTarget.style.filter = 'brightness(1.2)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.filter = 'brightness(1)'
       }}
     >
       {children}

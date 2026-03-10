@@ -95,8 +95,7 @@ export default function ConnectPRO() {
                       transition: 'all 0.15s',
                       position: 'relative',
                     }}
-                    onMouseEnter={e => { if (!connected) e.currentTarget.style.background = `${pro.color}0f` }}
-                    onMouseLeave={e => { if (!connected && !isSelected) e.currentTarget.style.background = 'rgba(255,255,255,0.04)' }}
+                    className={!connected ? 'hover-brighten' : ''}
                   >
                     {connected && (
                       <div style={{ position: 'absolute', top: 8, right: 8 }}>
