@@ -47,7 +47,7 @@ export default function SyncLicensing() {
     if (!authFetch) return
     authFetch('/api/sync-licenses')
       .then(r => r.json())
-      .then(data => { setLicenses(data); setLoading(false) })
+      .then(data => { setLicenses(Array.isArray(data) ? data : []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [authFetch])
 
