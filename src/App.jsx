@@ -17,7 +17,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 function ProtectedLayout({ children }) {
   const { user } = useAuth()
   const { showPricing } = useSubscription()
-  const [sidebarWidth, setSidebarWidth] = useState(240)
+  const [sidebarWidth, setSidebarWidth] = useState(60)
   if (!user) return <Navigate to="/login" replace />
 
   return (

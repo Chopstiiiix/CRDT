@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Music2, Settings, LogOut, Plus, ChevronRight, Film, Crown, Shield, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -14,13 +14,33 @@ export default function Sidebar({ onWidthChange }) {
   const { connectedPROs } = usePRO()
   const { currentTier, setShowPricing, tier } = useSubscription()
   const navigate = useNavigate()
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
+  const sidebarRef = useRef(null)
 
   const w = collapsed ? COLLAPSED_W : EXPANDED_W
+
+  // Collapse when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!collapsed && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+        setCollapsed(true)
+        onWidthChange?.(COLLAPSED_W)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [collapsed, onWidthChange])
 
   const handleLogout = () => {
     logout()
     navigate('/login')
+  }
+
+  const expand = () => {
+    if (collapsed) {
+      setCollapsed(false)
+      onWidthChange?.(EXPANDED_W)
+    }
   }
 
   const toggleCollapse = () => {
@@ -30,10 +50,7 @@ export default function Sidebar({ onWidthChange }) {
   }
 
   const handleNavClick = () => {
-    if (collapsed) {
-      setCollapsed(false)
-      onWidthChange?.(EXPANDED_W)
-    }
+    expand()
   }
 
   const navStyle = (isActive) => ({
@@ -56,7 +73,7 @@ export default function Sidebar({ onWidthChange }) {
   })
 
   return (
-    <aside style={{
+    <aside ref={sidebarRef} style={{
       width: w,
       minWidth: w,
       height: '100vh',
