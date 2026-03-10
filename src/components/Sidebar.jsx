@@ -19,17 +19,10 @@ export default function Sidebar({ onWidthChange }) {
 
   const w = collapsed ? COLLAPSED_W : EXPANDED_W
 
-  // Collapse when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (!collapsed && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-        setCollapsed(true)
-        onWidthChange?.(COLLAPSED_W)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [collapsed, onWidthChange])
+  const collapse = () => {
+    setCollapsed(true)
+    onWidthChange?.(COLLAPSED_W)
+  }
 
   const handleLogout = () => {
     logout()
@@ -73,7 +66,7 @@ export default function Sidebar({ onWidthChange }) {
   })
 
   return (
-    <aside ref={sidebarRef} style={{
+    <aside ref={sidebarRef} onMouseEnter={expand} onMouseLeave={collapse} style={{
       width: w,
       minWidth: w,
       height: '100vh',
