@@ -3,9 +3,30 @@ import { API_URL } from '../config'
 
 const AuthContext = createContext(null)
 
+function saveAuth(user, session) {
+  try {
+    localStorage.setItem('rt_user', JSON.stringify(user))
+    localStorage.setItem('rt_session', JSON.stringify(session))
+  } catch {}
+}
+
+function loadAuth() {
+  try {
+    const user = JSON.parse(localStorage.getItem('rt_user'))
+    const session = JSON.parse(localStorage.getItem('rt_session'))
+    if (user && session?.access_token) return { user, session }
+  } catch {}
+  return { user: null, session: null }
+}
+
+function clearAuth() {
+  localStorage.removeItem('rt_user')
+  localStorage.removeItem('rt_session')
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [session, setSession] = useState(null)
+  const [user, setUser] = useState(() => loadAuth().user)
+  const [session, setSession] = useState(() => loadAuth().session)
 
   const login = useCallback(async (email, password) => {
     try {
@@ -19,6 +40,7 @@ export function AuthProvider({ children }) {
 
       setUser(data.user)
       setSession(data.session)
+      saveAuth(data.user, data.session)
       return { ok: true }
     } catch {
       return { ok: false, error: 'Network error' }
@@ -37,6 +59,7 @@ export function AuthProvider({ children }) {
 
       setUser(data.user)
       setSession(data.session)
+      saveAuth(data.user, data.session)
       return { ok: true }
     } catch {
       return { ok: false, error: 'Network error' }
@@ -52,6 +75,7 @@ export function AuthProvider({ children }) {
     }
     setUser(null)
     setSession(null)
+    clearAuth()
   }, [session])
 
   // Helper for authenticated fetch calls
