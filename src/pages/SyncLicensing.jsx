@@ -7,7 +7,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { usePRO } from '../context/PROContext'
 import { useSubscription } from '../context/SubscriptionContext'
-import { GlassCard, GlassButton, Badge, SectionHeader, Divider } from '../components/UI'
+import { GlassCard, GlassButton, Badge, SectionHeader, Divider, CoreLoader } from '../components/UI'
 import UpgradeGate from '../components/UpgradeGate'
 
 const TYPE_ICONS = {
@@ -188,7 +188,7 @@ export default function SyncLicensing() {
 
       {/* Licenses List */}
       {loading ? (
-        <GlassCard style={{ textAlign: 'center', padding: 40, color: 'var(--text-tertiary)' }}>Loading...</GlassCard>
+        <GlassCard style={{ padding: 20 }}><CoreLoader /></GlassCard>
       ) : visibleLicenses.length === 0 ? (
         <GlassCard style={{ textAlign: 'center', padding: 40 }}>
           <Film size={28} style={{ color: 'var(--text-tertiary)', marginBottom: 12 }} />

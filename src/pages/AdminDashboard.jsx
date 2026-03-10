@@ -6,7 +6,7 @@ import {
   ChevronRight, BarChart3, Globe
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { GlassCard, GlassButton, Badge, Avatar, Divider } from '../components/UI'
+import { GlassCard, GlassButton, Badge, Avatar, Divider, CoreLoader } from '../components/UI'
 
 const PRO_COLORS = {
   bmi: '#4a9eff', ascap: '#34d399', prs: '#a78bfa',
@@ -78,9 +78,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div style={{ padding: '28px 32px', animation: 'fadeIn 0.3s ease forwards' }}>
-        <GlassCard style={{ textAlign: 'center', padding: 60, color: 'var(--text-tertiary)' }}>
-          Loading admin data...
-        </GlassCard>
+        <GlassCard style={{ padding: 20 }}><CoreLoader /></GlassCard>
       </div>
     )
   }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 export function GlassCard({ children, className = '', style = {}, onClick }) {
   return (
@@ -153,5 +153,92 @@ export function LoadingSpinner({ size = 20 }) {
       borderRadius: '50%',
       animation: 'spin 0.7s linear infinite',
     }} />
+  )
+}
+
+const LOADING_STATES = ['Loading...', 'Fetching Data..', 'Syncing...', 'Processing..', 'Optimizing...']
+
+export function CoreLoader({ size = 80 }) {
+  const [textIndex, setTextIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTextIndex(i => (i + 1) % LOADING_STATES.length)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 200, gap: 32 }}>
+      <div style={{ position: 'relative', width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {/* Base glow */}
+        <div style={{
+          position: 'absolute', inset: 0, borderRadius: '50%',
+          filter: 'blur(16px)',
+          background: 'rgba(34,211,238,0.1)',
+          animation: 'pulse 2s ease-in-out infinite',
+        }} />
+        {/* Outer dashed ring */}
+        <div style={{
+          position: 'absolute', inset: 0, borderRadius: '50%',
+          border: '1px dashed rgba(34,211,238,0.2)',
+          animation: 'spin 10s linear infinite',
+        }} />
+        {/* Main arc */}
+        <div style={{
+          position: 'absolute', inset: size * 0.05, borderRadius: '50%',
+          border: '2px solid transparent',
+          borderTopColor: '#22d3ee',
+          boxShadow: '0 0 10px rgba(34,211,238,0.4)',
+          animation: 'spin 2s linear infinite',
+        }} />
+        {/* Reverse arc */}
+        <div style={{
+          position: 'absolute', inset: size * 0.15, borderRadius: '50%',
+          border: '2px solid transparent',
+          borderBottomColor: '#a855f7',
+          boxShadow: '0 0 10px rgba(168,85,247,0.4)',
+          animation: 'spin 3s linear infinite reverse',
+        }} />
+        {/* Inner fast ring */}
+        <div style={{
+          position: 'absolute', inset: size * 0.25, borderRadius: '50%',
+          border: '1px solid transparent',
+          borderLeftColor: 'rgba(255,255,255,0.5)',
+          animation: 'spin 1s ease-in-out infinite',
+        }} />
+        {/* Orbital dot */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          animation: 'spin 4s linear infinite',
+        }}>
+          <div style={{
+            position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+            width: 4, height: 4, borderRadius: '50%',
+            background: '#22d3ee',
+            boxShadow: '0 0 6px rgba(34,211,238,0.8)',
+          }} />
+        </div>
+        {/* Center core */}
+        <div style={{
+          position: 'absolute',
+          width: 8, height: 8, borderRadius: '50%',
+          background: '#fff',
+          boxShadow: '0 0 10px rgba(255,255,255,0.8)',
+          animation: 'pulse 2s ease-in-out infinite',
+        }} />
+      </div>
+      {/* Text */}
+      <span
+        key={textIndex}
+        style={{
+          fontSize: 10, fontWeight: 500, letterSpacing: '0.3em', textTransform: 'uppercase',
+          color: 'rgba(34,211,238,0.7)',
+          animation: 'fadeIn 0.5s ease forwards',
+        }}
+      >
+        {LOADING_STATES[textIndex]}
+      </span>
+    </div>
   )
 }
