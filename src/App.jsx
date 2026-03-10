@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { PROProvider } from './context/PROContext'
@@ -16,6 +17,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 function ProtectedLayout({ children }) {
   const { user } = useAuth()
   const { showPricing } = useSubscription()
+  const [sidebarWidth, setSidebarWidth] = useState(240)
   if (!user) return <Navigate to="/login" replace />
 
   return (
@@ -27,15 +29,16 @@ function ProtectedLayout({ children }) {
         <div className="mesh-blob mesh-blob-3" />
       </div>
 
-      <Sidebar />
+      <Sidebar onWidthChange={setSidebarWidth} />
 
       <main style={{
         flex: 1,
-        marginLeft: 'var(--sidebar-w)',
+        marginLeft: sidebarWidth,
         minHeight: '100vh',
         position: 'relative',
         zIndex: 1,
         overflowY: 'auto',
+        transition: 'margin-left 0.3s cubic-bezier(0.4,0,0.2,1)',
       }}>
         {children}
       </main>
