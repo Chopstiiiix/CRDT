@@ -48,9 +48,25 @@ const TIER_CONFIG = {
   },
 }
 
+const STRIPE_LINKS = {
+  special: 'https://buy.stripe.com/test_cNifZhg1w2bYfgpceoasg00?prefilled_promo_code=SPECIAL',
+  royal: 'https://buy.stripe.com/test_cNifZhg1w2bYfgpceoasg00?prefilled_promo_code=ROYAL',
+}
+
 export default function PricingModal() {
   const { tier: currentTier, upgradeTo, setShowPricing } = useSubscription()
   const [hoveredTier, setHoveredTier] = useState(null)
+
+  const handleUpgrade = (tierId) => {
+    if (tierId === 'free') {
+      upgradeTo(tierId)
+      return
+    }
+    const link = STRIPE_LINKS[tierId]
+    if (link) {
+      window.open(link, '_blank')
+    }
+  }
 
   return (
     <div
@@ -217,7 +233,7 @@ export default function PricingModal() {
 
                 {/* CTA Button */}
                 <button
-                  onClick={() => upgradeTo(tierId)}
+                  onClick={() => handleUpgrade(tierId)}
                   disabled={isActive}
                   style={{
                     width: '100%',
